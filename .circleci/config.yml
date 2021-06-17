@@ -3,16 +3,27 @@ version: 2.1
 workflows:
   test-env-vars:
     jobs:
-      - build
+      - save_hello_world_output
 
 jobs:
-  build:
+  save_hello_world_output:
     docker:
       - image: cimg/base:2020.01
     steps:
-      - checkout
       - run:
-          name: "echo an env var that is part of our project"
           command: |
-            echo $MY_NAME
-            echo $CIRCLE_BRANCH
+            echo "text to output here" > output.txt
+      - persist_to_workspace:
+          paths:
+            - output.txt
+       
+  print_output_file:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: output.txt
+      - run:
+          command: |
+            cat output.txt
