@@ -14,6 +14,7 @@ jobs:
           command: |
             echo "text to output here" > output.txt
       - persist_to_workspace:
+          root: /
           paths:
             - output.txt
        
