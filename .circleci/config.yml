@@ -1,45 +1,18 @@
 version: 2.1
-commands:
-  print_pipeline_id:
-    description: "A very simple command for demonstration purposes"
-    steps:
-      - run: echo $CIRCLE_WORKFLOW_ID
 
 workflows:
   my-workflow:
     jobs:
-      - save_hello_world_output
-      - print_output_file:
-          requires:
-            - save_hello_world_output
       - print_pipeline_job
 
 jobs:
-  save_hello_world_output:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - run: mkdir -p workspace
-      - run: echo "Hello, world!" > workspace/output.txt
-      - persist_to_workspace:
-          root: workspace
-          paths:
-            - output.txt
-       
-  print_output_file:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: workspace
-      - run:
-          command: |
-            cd workspace && cat output.txt
-  
   print_pipeline_job:
     docker:
-      - image: cimg/base:2020.01
+      - image: circleci/node:13.8.0
     steps:
-      - print_pipeline_id
-    
+      - run: return 1 
+      - run: 
+          command: echo Your command failed
+          when: on_fail
+
+
