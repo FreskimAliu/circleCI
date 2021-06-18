@@ -6,12 +6,13 @@ commands:
       - run: echo $CIRCLE_WORKFLOW_ID
 
 workflows:
-  test-env-vars:
+  my-workflow:
     jobs:
       - save_hello_world_output
       - print_output_file:
           requires:
-            - save_hello_world_output      
+            - save_hello_world_output
+      - print_pipeline_job
 
 jobs:
   save_hello_world_output:
@@ -35,7 +36,8 @@ jobs:
       - run:
           command: |
             cd workspace && cat output.txt
-  print_pipeline_jobs:
+  
+  print_pipeline_job:
     docker:
       - image: cimg/base:2020.01
     steps:
