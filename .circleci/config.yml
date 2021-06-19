@@ -1,18 +1,16 @@
-version: 2.1
-
-workflows:
-  my-workflow:
-    jobs:
-      - print_pipeline_job
-
+version: '2.1'
+orbs:
+  aws-cli: circleci/aws-cli@2.0
 jobs:
-  print_pipeline_job:
-    docker:
-      - image: circleci/node:13.8.0
+  aws-cli-example:
+    executor: aws-cli/default
     steps:
-      - run: return 1 
-      - run: 
-          command: echo Your command failed
-          when: on_fail
-
-
+      - checkout
+      - aws-cli/setup:
+          profile-name: example
+      - run: echo "Run your code here"
+workflows:
+  aws-cli:
+    jobs:
+      - aws-cli-example:
+          context: aws
