@@ -12,7 +12,25 @@ jobs:
             aws cloudformation deploy \
               --template-file template.yml \
               --stack-name my-stack
+  configure_infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["73:a6:01:84:87:0c:86:62:12:d3:db:ba:89:54:23:d1"]
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure Server
+          command: |
+            ansible-playbook -i inventory.txt playbook.yml
 workflows:
   create-resources:
     jobs:
       - create_infrastructure
+      - configure_infrastructure:
+          requires:
+            - create_infrastructure
