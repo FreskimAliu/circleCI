@@ -1,0 +1,34 @@
+version: '2.1'
+orbs:
+  aws-cli: circleci/aws-cli@2.0
+jobs:
+  upload-inventory:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile-name: example
+      - run: mkdir workspace
+      - run: echo "[all]" > workspace/inventory    
+      - run: aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --region us-west-2 >> workspace/inventory
+      - persist_to_workspace:
+          root: workspace
+          # Must be relative path from root
+          paths:
+            - inventory
+  get-inventory:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+       - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: workspace
+       - run: cd workspace && cat inventory 
+workflows:
+  aws-cli:
+    jobs:
+      - upload-inventory:
+          context: aws
+      - get-inventory:
+          requires:
+            - upload-inventory
