@@ -22,7 +22,7 @@ jobs:
     steps:
        - attach_workspace:
           # Must be absolute path or relative path from working_directory
-          at: /workspace
+          at: workspace
        - run: cat inventory 
 workflows:
   aws-cli:
