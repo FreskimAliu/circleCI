@@ -8,7 +8,7 @@ jobs:
       - checkout
       - aws-cli/setup:
           profile-name: example
-      - run: aws s3 ls 
+      - run: s3 ls 
 workflows:
   aws-cli:
     jobs:
