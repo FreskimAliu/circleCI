@@ -8,7 +8,9 @@ jobs:
       - checkout
       - aws-cli/setup:
           profile-name: example
-      - run: aws s3api list-buckets
+      - run: | 
+          aws configure set default.region us-west-2
+          aws s3api list-buckets
 workflows:
   aws-cli:
     jobs:
