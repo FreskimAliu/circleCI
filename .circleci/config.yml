@@ -6,9 +6,12 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: export AWS_PROFILE=default
-      - run: aws cloudformation create-stack --stack-name myInfrastructure --template-body file://template.yml --region=us-west-2
-
+      - run:
+          name: Deploy infrastructure stack
+          command: |
+            aws cloudformation deploy \
+            --stack-name myInfrastructure \
+            --template-body file://template.yml --region us-east-1
 workflows:
   create-resources:
     jobs:
