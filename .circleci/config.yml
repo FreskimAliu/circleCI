@@ -10,7 +10,7 @@ jobs:
           profile-name: example
       - run: mkdir workspace
       - run: echo "[all]" > workspace/inventory    
-      - run: aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --region us-west-2 >> inventory
+      - run: aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --region us-west-2 >> workspace/inventory
       - persist_to_workspace:
           root: workspace
           # Must be relative path from root
