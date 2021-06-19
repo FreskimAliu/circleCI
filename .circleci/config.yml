@@ -9,8 +9,7 @@ jobs:
       - aws-cli/setup:
           profile-name: example
       - run: | 
-          aws configure set default.region us-west-2
-          aws s3api list-buckets
+          aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --region us-west-2
 workflows:
   aws-cli:
     jobs:
