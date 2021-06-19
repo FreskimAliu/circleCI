@@ -4,7 +4,6 @@ orbs:
 jobs:
   upload-inventory:
     executor: aws-cli/default
-    working_directory: /workspace
     steps:
       - checkout
       - aws-cli/setup:
@@ -12,7 +11,7 @@ jobs:
       - run: echo "[all]" > inventory    
       - run: aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --region us-west-2 >> inventory
       - persist_to_workspace:
-          root: workspace
+          root: /
           # Must be relative path from root
           paths:
             - inventory
