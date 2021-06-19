@@ -23,7 +23,7 @@ jobs:
        - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: workspace
-       - run: cat inventory 
+       - run: cd workspace && cat inventory 
 workflows:
   aws-cli:
     jobs:
