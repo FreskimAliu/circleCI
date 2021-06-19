@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - run: export AWS_PROFILE=default
-      - run: aws s3 ls
-      
+      - run: aws cloudformation create-stack --stack-name myInfrastructure --template-body file://template.yml --region=us-west-2
+
 workflows:
   create-resources:
     jobs:
