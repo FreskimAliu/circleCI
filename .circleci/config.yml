@@ -19,15 +19,12 @@ jobs:
       - checkout
       - run: mkdir workspace
       - run:
-          name: Install CURL
+          name: Install AWS CLI
           command: |
-            apk add --update curl
-      - run: 
-          name: Install AWSCLI2
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.0.30.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            ./aws/install
+            apk add --no-cache python3 py3-pip
+            pip3 install --upgrade pip 
+            pip3 install awscli
+            rm -rf /var/cache/apk/*
       - run:
           name: Get the last deploymentID
           command: |
