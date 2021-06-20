@@ -12,7 +12,21 @@ jobs:
               --template-file bucket.yml \
               --stack-name "stack-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-override NAME="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+  get_last_deployment_id:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get the last deploymentID
+          command: |
+            aws cloudformation list-exports \
+              --query "Exports[?Name==\`PipelineID\`].Value" \
+              --no-paginate --output text
 workflows:
-  create-resources:
+  create-front-end-resources:
     jobs:
       - create_and_deploy_front_end
+      - get_last_deployment_id:
+          requires:
+            - create_and_deploy_front_end
