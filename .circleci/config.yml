@@ -51,17 +51,24 @@ jobs:
 
   clean_up_old_front_end:
     docker:
-      - image: amazon/aws-cli
+      - image: alpine:latest
     steps:
       - checkout
       - attach_workspace:
           at: /workspace
       - run:
+          name: Install AWS CLI
+          command: |
+            apk add --no-cache python3 py3-pip
+            pip3 install --upgrade pip 
+            pip3 install awscli
+            rm -rf /var/cache/apk/*
+      - run:
           name: Clean Up Old Front End
           command: |
-            cat deployment_id
-            # aws s3 rm "s3://${OldPipelineID}" --recursive
-            # aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
+            $PipelineId=$(cat deployment_id)
+            aws s3 rm "s3://bucket-${PipelineId}" --recursive
+            aws cloudformation delete-stack --stack-name "stack-${PipelineId}"
   
 workflows:
   create-front-end-resources:
@@ -73,3 +80,7 @@ workflows:
       - promote_to_production:
           requires:
             - create_and_deploy_front_end
+      - clean_up_old_front_end:
+          requires:
+            - get_last_deployment_id
+            - promote_to_production
