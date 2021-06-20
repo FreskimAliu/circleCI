@@ -71,10 +71,7 @@ jobs:
       - run:
           name: Clean Up Old Front End
           command: |
-            ls
-            cd workspace
-            ls
-            $PipelineId=$(cat deployment_id)
+            PipelineId=$(cat deployment_id)
             echo $PipelineId
             aws s3 rm "s3://bucket-${PipelineId}" --recursive
             aws cloudformation delete-stack --stack-name "stack-${PipelineId}"
