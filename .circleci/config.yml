@@ -1,68 +1,18 @@
 version: '2.1'
-commands:
-  destroy_environment:
-    steps:
-      - run:
-          name: Destroy environment
-          command: |
-            aws cloudformation delete-stack --stack-name EC2-Infrastructure
-          when: on_fail
 jobs:
-  create_infrastructure:
+  create_and_deploy_front_end:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
       - run:
-          name: Ensure backend infrastructure exist
+          name: Create and deploy Front End
           command: |
             aws cloudformation deploy \
-              --template-file template.yml \
-              --stack-name EC2-Infrastructure
-      - destroy_environment
-  configure_infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["73:a6:01:84:87:0c:86:62:12:d3:db:ba:89:54:23:d1"]
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible
-      - run:
-          name: Configure Server
-          command: |
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i inventory.txt main-remote.yml 
-  smoke_test:
-    docker:
-      - image: alpine:latest
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["73:a6:01:84:87:0c:86:62:12:d3:db:ba:89:54:23:d1"]
-      - run:
-          name: Install CURL
-          command: |
-            apk add --update curl
-      - run: 
-          name: Test your Web App
-          command: |
-            if curl -s --head "54.190.206.206:3000" 
-            then
-              return 0
-            else
-              return 1
-            fi
+              --template-file bucket.yml \
+              --stack-name "${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-override NAME="${CIRCLE_WORKFLOW_ID:0:7}"
 workflows:
   create-resources:
     jobs:
-      - create_infrastructure
-      - configure_infrastructure:
-          requires:
-            - create_infrastructure
-      - smoke_test:
-          requires:
-            - configure_infrastructure
+      - create_and_deploy_front_end
