@@ -14,11 +14,14 @@ jobs:
               --parameter-override NAME="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
   get_last_deployment_id:
     docker:
-      - image: amazon/aws-cli
+      - image: alpine:latest
     steps:
       - checkout
       - run: mkdir workspace
-      - run: touch deployment_id
+      - run:
+          name: Install AWSCLI
+          command: |
+            apk add --update awscli2 
       - run:
           name: Get the last deploymentID
           command: |
