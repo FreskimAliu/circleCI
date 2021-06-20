@@ -11,7 +11,7 @@ jobs:
             aws cloudformation deploy \
               --template-file bucket.yml \
               --stack-name "stack-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-override NAME="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+              --parameter-override NAME="${CIRCLE_WORKFLOW_ID:0:7}"
       - run: 
           name: Upload new file in new Bucket
           command: | 
