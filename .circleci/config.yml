@@ -51,7 +51,7 @@ jobs:
             aws cloudformation deploy \
               --template-file cloudfront.yml \
               --stack-name production-distro \
-              --parameter-override PipelineID="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+              --parameter-override PipelineID="${CIRCLE_WORKFLOW_ID:0:7}"
 
   clean_up_old_front_end:
     docker:
@@ -59,7 +59,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /workspace
+          # Must be absolute path or relative path from working_directory
+          at: workspace
       - run:
           name: Install AWS CLI
           command: |
@@ -70,7 +71,7 @@ jobs:
       - run:
           name: Clean Up Old Front End
           command: |
-            ls -al
+            cd workspace
             $PipelineId=$(cat deployment_id)
             aws s3 rm "s3://bucket-${PipelineId}" --recursive
             aws cloudformation delete-stack --stack-name "stack-${PipelineId}"
