@@ -26,7 +26,8 @@ jobs:
       - run:
           name: Configure Server
           command: |
-            ansible-playbook -i inventory.txt main-remote.yml -y 
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i inventory.txt main-remote.yml 
 workflows:
   create-resources:
     jobs:
