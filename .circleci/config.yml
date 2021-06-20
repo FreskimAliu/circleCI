@@ -12,6 +12,10 @@ jobs:
               --template-file bucket.yml \
               --stack-name "stack-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-override NAME="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: 
+          name: Upload new file in new Bucket
+          command: | 
+            aws s3 cp index.html s3://bucket-${CIRCLE_WORKFLOW_ID:0:7}/index.html
   get_last_deployment_id:
     docker:
       - image: alpine:latest
@@ -48,6 +52,12 @@ jobs:
               --template-file cloudfront.yml \
               --stack-name production-distro \
               --parameter-override PipelineID="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: 
+          name: Create CloudFront Invalidation
+          command: |
+            aws cloudfront create-invalidation \
+              --distribution-id E3PV6XOL3R2Y0A
+              --paths "/*"
 
   clean_up_old_front_end:
     docker:
@@ -66,6 +76,7 @@ jobs:
       - run:
           name: Clean Up Old Front End
           command: |
+            cd workspace
             $PipelineId=$(cat deployment_id)
             aws s3 rm "s3://bucket-${PipelineId}" --recursive
             aws cloudformation delete-stack --stack-name "stack-${PipelineId}"
