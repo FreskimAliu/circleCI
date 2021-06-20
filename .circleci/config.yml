@@ -73,6 +73,7 @@ jobs:
           command: |
             ls
             cd workspace
+            ls
             $PipelineId=$(cat deployment_id)
             echo $PipelineId
             aws s3 rm "s3://bucket-${PipelineId}" --recursive
