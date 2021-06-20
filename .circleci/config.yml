@@ -28,6 +28,26 @@ jobs:
           command: |
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i inventory.txt main-remote.yml 
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["73:a6:01:84:87:0c:86:62:12:d3:db:ba:89:54:23:d1"]
+      - run:
+          name: Install CURL
+          command: |
+            apk add --update curl
+      - run: 
+          name: Test your Web App
+          command: |
+            if curl -s --head "https://google.com" 
+            then
+              echo "It worked!"
+            else
+              echo "It failed"
+            fi
 workflows:
   create-resources:
     jobs:
@@ -35,3 +55,6 @@ workflows:
       - configure_infrastructure:
           requires:
             - create_infrastructure
+      - smoke_test:
+          requires:
+            - configure_infrastructure
