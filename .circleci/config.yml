@@ -1,5 +1,12 @@
 version: '2.1'
-
+commands:
+  destroy_environment:
+    steps:
+      - run:
+          name: Destroy environment
+          command: |
+            aws cloudformation delete-stack --stack-name ${CIRCLE_WORKFLOW_ID}-infrastructure
+          when: on_fail
 jobs:
   create_infrastructure:
     docker:
@@ -11,7 +18,8 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file template.yml \
-              --stack-name my-stack
+              --stack-name ${CIRCLE_WORKFLOW_ID}-infrastructure
+      - destroy_environment
   configure_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -26,7 +34,28 @@ jobs:
       - run:
           name: Configure Server
           command: |
-            ansible-playbook -i inventory.txt playbook.yml
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i inventory.txt main-remote.yml 
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["73:a6:01:84:87:0c:86:62:12:d3:db:ba:89:54:23:d1"]
+      - run:
+          name: Install CURL
+          command: |
+            apk add --update curl
+      - run: 
+          name: Test your Web App
+          command: |
+            if curl -s --head "54.190.206.206:3000" 
+            then
+              return 0
+            else
+              return 1
+            fi
 workflows:
   create-resources:
     jobs:
@@ -34,3 +63,6 @@ workflows:
       - configure_infrastructure:
           requires:
             - create_infrastructure
+      - smoke_test:
+          requires:
+            - configure_infrastructure
