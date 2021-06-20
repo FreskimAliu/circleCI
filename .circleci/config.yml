@@ -17,12 +17,30 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run: mkdir workspace
       - run:
           name: Get the last deploymentID
           command: |
             aws cloudformation list-exports \
               --query "Exports[?Name==\`PipelineID\`].Value" \
-              --no-paginate --output text
+              --no-paginate --output text > workspace/deployment_id.txt
+      - persist_to_workspace:
+          root: workspace
+          # Must be relative path from root
+          paths:
+            - deployment_id.txt
+  promote_to_production:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Promote to Production
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudfront.yml \
+              --stack-name production-distro \
+              --parameter-override PipelineID="bucket-${CIRCLE_WORKFLOW_ID:0:7}"
 workflows:
   create-front-end-resources:
     jobs:
@@ -30,3 +48,6 @@ workflows:
       - get_last_deployment_id:
           requires:
             - create_and_deploy_front_end
+      - promote_to_production:
+          requires:
+            - get_last_deployment_id
